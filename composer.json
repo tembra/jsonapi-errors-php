@@ -1,0 +1,27 @@
+{
+    "name": "tembra/jsonapi-errors-php",
+    "description": "A PHP implementation of JSON API Errors compliant format.",
+    "keywords": ["json","api","json api","json-api","error","errors"],
+    "homepage": "https://github.com/tembra/jsonapi-errors-php",
+    "license": "BSD-3-Clause",
+    "authors": [
+        {
+            "name": "Thieres Tembra",
+            "email": "tdt@mytdt.com.br",
+            "homepage": "http://www.mytdt.com.br",
+            "role": "CEO"
+        }
+    ],
+    "require": {
+        "php": ">=5.4.0",
+        "neomerx/json-api": "=0.8.8"
+    },
+    "suggest": {
+        "dingo/api": "A RESTful API package for the Laravel and Lumen frameworks."
+    },
+    "autoload": {
+        "psr-4": {
+            "Mytdt\\JsonApi\\Errors\\": "src/"
+        }
+    }
+}
