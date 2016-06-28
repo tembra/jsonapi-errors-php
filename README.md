@@ -1,3 +1,5 @@
+[![StyleCI](https://styleci.io/repos/62092362/shield)](https://styleci.io/repos/62092362)
+
 ## Description 
 
 <a href="http://jsonapi.org/" target="_blank"><img src="http://jsonapi.org/images/jsonapi.png" alt="JSON API logo" title="JSON API" align="right" width="415" height="130" /></a>
