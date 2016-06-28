@@ -2,6 +2,7 @@
 
 namespace Mytdt\JsonApi\Errors;
 
+use Exception;
 use Neomerx\JsonApi\Document\Error;
 use Neomerx\JsonApi\Document\Link;
 use Neomerx\JsonApi\Encoder\Encoder;
@@ -9,27 +10,26 @@ use Neomerx\JsonApi\Exceptions\ErrorCollection;
 use Neomerx\JsonApi\Exceptions\JsonApiException;
 use ReflectionClass;
 use ReflectionMethod;
-use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class MyJsonApiErrors
 {
     /**
      * The error array to be overridden with the app error codes.
-     * 
+     *
      * @var array
      */
-    protected static $errors = array();
+    protected static $errors = [];
 
     /**
      * The collection to add one or more errors.
-     * 
+     *
      * @var \Neomerx\JsonApi\Exceptions\ErrorCollection
      */
     protected static $errorsCollection;
 
     /**
      * The HTTP Status Code for the error response.
-     * 
+     *
      * @var int
      */
     protected static $statusCode;
@@ -41,7 +41,7 @@ class MyJsonApiErrors
      * @param bool      $throw
      *
      * @throws \Neomerx\JsonApi\Exceptions\JsonApiException
-     * 
+     *
      * @return null|string
      */
     public static function notFound($codes, $throw = true)
@@ -56,7 +56,7 @@ class MyJsonApiErrors
      * @param bool      $throw
      *
      * @throws \Neomerx\JsonApi\Exceptions\JsonApiException
-     * 
+     *
      * @return null|string
      */
     public static function badRequest($codes, $throw = true)
@@ -71,7 +71,7 @@ class MyJsonApiErrors
      * @param bool      $throw
      *
      * @throws \Neomerx\JsonApi\Exceptions\JsonApiException
-     * 
+     *
      * @return null|string
      */
     public static function forbidden($codes, $throw = true)
@@ -86,7 +86,7 @@ class MyJsonApiErrors
      * @param bool      $throw
      *
      * @throws \Neomerx\JsonApi\Exceptions\JsonApiException
-     * 
+     *
      * @return null|string
      */
     public static function internal($codes, $throw = true)
@@ -101,7 +101,7 @@ class MyJsonApiErrors
      * @param bool      $throw
      *
      * @throws \Neomerx\JsonApi\Exceptions\JsonApiException
-     * 
+     *
      * @return null|string
      */
     public static function unauthorized($codes, $throw = true)
@@ -116,7 +116,7 @@ class MyJsonApiErrors
      * @param bool      $throw
      *
      * @throws \Neomerx\JsonApi\Exceptions\JsonApiException
-     * 
+     *
      * @return null|string
      */
     public static function methodNotAllowed($codes, $throw = true)
@@ -132,7 +132,7 @@ class MyJsonApiErrors
      * @param bool      $throw
      *
      * @throws \Neomerx\JsonApi\Exceptions\JsonApiException
-     * 
+     *
      * @return null|string
      */
     public static function error($codes, $statusCode = 500, $throw = true)
@@ -144,8 +144,6 @@ class MyJsonApiErrors
         } else {
             return self::jsonError();
         }
-
-        return;
     }
 
     /**
@@ -160,7 +158,7 @@ class MyJsonApiErrors
 
     /**
      * Returns the errors encoded in a JSON string format.
-     * 
+     *
      * @return string
      */
     private static function jsonError()
@@ -174,15 +172,15 @@ class MyJsonApiErrors
      * Morphs codes int|array into an ErrorCollection.
      *
      * @param int|array $codes
-     * 
-     * @throws \Symfony\Component\HttpKernel\Exception\HttpException
+     *
+     * @throws \Exception
      */
     private static function morph($codes)
     {
         if (is_int($codes)) {
-            $codes = array($codes);
+            $codes = [$codes];
         } elseif (!is_array($codes)) {
-            throw new HttpException(500, 'Invalid code format given to MyJsonApiErrors.');
+            throw new Exception('Invalid code format given to MyJsonApiErrors.');
         }
         if (function_exists('app')) {
             $debug = app('config')->get('api.debug');
@@ -202,14 +200,14 @@ class MyJsonApiErrors
                 $meta = !array_key_exists('meta', $value) ? null : $value['meta'];
                 self::addError($key, $debug, $title, $detail, $method, $parameter, $idx, $link, $meta);
             } else {
-                throw new HttpException(500, 'Invalid array code format given to MyJsonApiErrors.');
+                throw new Exception('Invalid array code format given to MyJsonApiErrors.');
             }
         }
     }
 
     /**
      * Adds new Error object to the collection.
-     * 
+     *
      * @param string     $code
      * @param bool       $debug
      * @param string     $title
@@ -219,8 +217,8 @@ class MyJsonApiErrors
      * @param int|string $idx
      * @param array      $link
      * @param array      $meta
-     * 
-     * @throws \Symfony\Component\HttpKernel\Exception\HttpException
+     *
+     * @throws \Exception
      */
     private static function addError($code, $debug, $title = null, $detail = null, $method = null, $parameter = null, $idx = null, array $link = null, array $meta = null)
     {
@@ -247,36 +245,36 @@ class MyJsonApiErrors
                     if ($parameter) {
                         self::$errorsCollection->$method($parameter, $title, $detail, self::$statusCode, $idx, $link, $code, $meta);
                     } else {
-                        throw new HttpException(500, 'Invalid property format errors given to MyJsonApiErrors. The method provided expects a parameter.');
+                        throw new Exception('Invalid property format errors given to MyJsonApiErrors. The method provided expects a parameter.');
                     }
                 } else {
                     self::$errorsCollection->$method($title, $detail, self::$statusCode, $idx, $link, $code, $meta);
                 }
             } else {
                 $allMethods = $reflection->getMethods(ReflectionMethod::IS_PUBLIC);
-                $availableMethods = array();
+                $availableMethods = [];
                 foreach ($allMethods as $method) {
                     if (substr($method->name, 0, 3) == 'add' && substr($method->name, -5) == 'Error') {
                         $availableMethods[] = lcfirst(substr($method->name, 3, strlen($method->name) - 8));
                     }
                 }
                 $availableMethods = implode(', ', $availableMethods);
-                throw new HttpException(500, 'Invalid property format errors given to MyJsonApiErrors. Invalid method provided. Available methods: '.$availableMethods.'.');
+                throw new Exception('Invalid property format errors given to MyJsonApiErrors. Invalid method provided. Available methods: '.$availableMethods.'.');
             }
         }
     }
 
     /**
      * Checks whether code given exists on error array.
-     * 
+     *
      * @param int $code
-     * 
+     *
      * @return array
      */
     private static function checkError($code)
     {
         if (!array_key_exists($code, static::$errors)) {
-            return array();
+            return [];
         }
 
         return static::$errors[$code];
@@ -284,13 +282,13 @@ class MyJsonApiErrors
 
     /**
      * Checks whether specified property exists on error code array.
-     * 
+     *
      * @param array  $error
      * @param string $property
      * @param bool   $required
-     * 
-     * @throws \Symfony\Component\HttpKernel\Exception\HttpException
-     * 
+     *
+     * @throws \Exception
+     *
      * @return string
      */
     private static function checkErrorData(array $error, $property, $required = false)
@@ -298,9 +296,9 @@ class MyJsonApiErrors
         if (!array_key_exists($property, $error)) {
             if ($required) {
                 if (count($error) == 0) {
-                    throw new HttpException(500, 'Invalid error code given to MyJsonApiErrors. No '.$property.' was found.');
+                    throw new Exception('Invalid error code given to MyJsonApiErrors. No '.$property.' was found.');
                 } else {
-                    throw new HttpException(500, 'Invalid property format errors given to MyJsonApiErrors. No '.$property.' was provided.');
+                    throw new Exception('Invalid property format errors given to MyJsonApiErrors. No '.$property.' was provided.');
                 }
             }
 
@@ -312,11 +310,11 @@ class MyJsonApiErrors
 
     /**
      * Checks whether link was provided and whether it is on valid format.
-     * 
+     *
      * @param array $link
-     * 
-     * @throws \Symfony\Component\HttpKernel\Exception\HttpException
-     * 
+     *
+     * @throws \Exception
+     *
      * @return null|\Neomerx\JsonApi\Document\Link
      */
     private static function checkLink(array $link = null)
@@ -328,10 +326,10 @@ class MyJsonApiErrors
         $linkMeta = !array_key_exists('meta', $link) ? null : $link['meta'];
         if ($linkMeta) {
             if (!is_array($linkMeta)) {
-                throw new HttpException(500, 'Invalid link meta given to MyJsonApiErrors.');
+                throw new Exception('Invalid link meta given to MyJsonApiErrors.');
             } else {
                 if (!self::isObject($linkMeta)) {
-                    throw new HttpException(500, 'Invalid link meta given to MyJsonApiErrors. Not an array representing an object.');
+                    throw new Exception('Invalid link meta given to MyJsonApiErrors. Not an array representing an object.');
                 }
             }
         }
@@ -341,11 +339,11 @@ class MyJsonApiErrors
 
     /**
      * Checks whether meta was provided and whether it is on valid format.
-     * 
+     *
      * @param array $meta
-     * 
-     * @throws \Symfony\Component\HttpKernel\Exception\HttpException
-     * 
+     *
+     * @throws \Exception
+     *
      * @return null|array
      */
     private static function checkMeta(array $meta = null)
@@ -354,7 +352,7 @@ class MyJsonApiErrors
             return;
         }
         if (!self::isObject($meta)) {
-            throw new HttpException(500, 'Invalid meta given to MyJsonApiErrors. Not an array representing an object.');
+            throw new Exception('Invalid meta given to MyJsonApiErrors. Not an array representing an object.');
         }
 
         return $meta;
@@ -362,9 +360,9 @@ class MyJsonApiErrors
 
     /**
      * Checks whether an array is in the JSON object format.
-     * 
+     *
      * @param array $object
-     * 
+     *
      * @return bool
      */
     private static function isObject(array $object)
