@@ -1,3 +1,6 @@
+[![License](https://img.shields.io/packagist/l/tembra/jsonapi-errors-php.svg?style=flat-square)](LICENSE)
+[![Version](https://img.shields.io/packagist/v/tembra/jsonapi-errors-php.svg?style=flat-square)](https://packagist.org/packages/tembra/jsonapi-errors-php)
+[![Total Installs](https://img.shields.io/packagist/dt/tembra/jsonapi-errors-php.svg?style=flat-square)](https://packagist.org/packages/tembra/jsonapi-errors-php)
 [![StyleCI](https://styleci.io/repos/62092362/shield)](https://styleci.io/repos/62092362)
 
 ## Description 
@@ -12,13 +15,13 @@ Still framework agnostic, you can easily integrate it with [Laravel/Lumen](https
 
 ## Milestone to v1.0
 
-[X] Makes a JSON API Errors as simple as calling a function
-[X] Standardize the errors
-[X] Most common error functions for HTTP Status Codes
-[X] Throw an exception or return the JSON string
-[X] Override JSON API Error Objects members
-[ ] Support for Localization
-[ ] Generate Documentation for Application Error Codes
++ [x] Makes a JSON API Errors as simple as calling a function
++ [x] Standardize the errors
++ [x] Most common error functions for HTTP Status Codes
++ [x] Throw an exception or return the JSON string
++ [x] Override JSON API Error Objects members
++ [ ] Support for Localization
++ [ ] Generate Documentation for Application Error Codes
 
 ## Sample usage
 
