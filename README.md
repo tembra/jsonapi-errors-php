@@ -10,18 +10,28 @@ It greatly simplifies the error processing with high code quality.
 
 Still framework agnostic, you can easily integrate it with [Laravel/Lumen](https://laravel.com) and [Dingo API](https://github.com/dingo/api).
 
+## Milestone to v1.0
+
+[X] Makes a JSON API Errors as simple as calling a function
+[X] Standardize the errors
+[X] Most common error functions for HTTP Status Codes
+[X] Throw an exception or return the JSON string
+[X] Override JSON API Error Objects members
+[ ] Support for Localization
+[ ] Generate Documentation for Application Error Codes
+
 ## Sample usage
 
-Assuming you don't want a specific class to standardize the errors and also don't want the documentation you can use as simple as this:
+Assuming you don't want a specific class to standardize the errors and also don't want the documentation or localization, you can use as simple as this:
 ```php
-echo MyJsonApiErrors::badRequest(array(
-  827 => array(
+echo MyJsonApiErrors::badRequest([
+  827 => [
     'title' => 'Another Error',
     'detail' => 'Detailed error description'
-  )
-), false);
+  ]
+], false);
 ```
-will output
+will output **as string**
 ```json
 {
   "errors": [
@@ -35,9 +45,9 @@ will output
 }
 ```
 
-The first parameter is an associative array where `key` is the error `code` in JSON API compliant format and `value` is another associative array where `key/value` pairs are some others members that JSON API Error Object may have.
+The first parameter is an associative array where `key` is the error `code` in JSON API compliant format and `value` is another associative array where `key/value` pairs are some others members that JSON API Error Objects may have.
 
-The second parameter `false` is to define whether a `JsonApiException` should be throwed or only the JSON string should be returned.
+The second parameter `false` is to define whether a `JsonApiException` should be thrown or only the JSON string should be returned.
 
 **For more advanced usage please check out the [Wiki](https://github.com/tembra/jsonapi-errors-php/wiki)**.
 

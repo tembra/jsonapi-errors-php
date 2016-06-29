@@ -35,21 +35,6 @@ class MyJsonApiErrors
     protected static $statusCode;
 
     /**
-     * Returns a 404 not found error with app error codes.
-     *
-     * @param int|array $codes
-     * @param bool      $throw
-     *
-     * @throws \Neomerx\JsonApi\Exceptions\JsonApiException
-     *
-     * @return null|string
-     */
-    public static function notFound($codes, $throw = true)
-    {
-        return self::error($codes, 404, $throw);
-    }
-
-    /**
      * Returns a 400 bad request error with app error codes.
      *
      * @param int|array $codes
@@ -62,36 +47,6 @@ class MyJsonApiErrors
     public static function badRequest($codes, $throw = true)
     {
         return self::error($codes, 400, $throw);
-    }
-
-    /**
-     * Returns a 403 forbidden error with app error codes.
-     *
-     * @param int|array $codes
-     * @param bool      $throw
-     *
-     * @throws \Neomerx\JsonApi\Exceptions\JsonApiException
-     *
-     * @return null|string
-     */
-    public static function forbidden($codes, $throw = true)
-    {
-        return self::error($codes, 403, $throw);
-    }
-
-    /**
-     * Returns a 500 internal server error with app error codes.
-     *
-     * @param int|array $codes
-     * @param bool      $throw
-     *
-     * @throws \Neomerx\JsonApi\Exceptions\JsonApiException
-     *
-     * @return null|string
-     */
-    public static function internal($codes, $throw = true)
-    {
-        return self::error($codes, 500, $throw);
     }
 
     /**
@@ -110,6 +65,36 @@ class MyJsonApiErrors
     }
 
     /**
+     * Returns a 403 forbidden error with app error codes.
+     *
+     * @param int|array $codes
+     * @param bool      $throw
+     *
+     * @throws \Neomerx\JsonApi\Exceptions\JsonApiException
+     *
+     * @return null|string
+     */
+    public static function forbidden($codes, $throw = true)
+    {
+        return self::error($codes, 403, $throw);
+    }
+
+    /**
+     * Returns a 404 not found error with app error codes.
+     *
+     * @param int|array $codes
+     * @param bool      $throw
+     *
+     * @throws \Neomerx\JsonApi\Exceptions\JsonApiException
+     *
+     * @return null|string
+     */
+    public static function notFound($codes, $throw = true)
+    {
+        return self::error($codes, 404, $throw);
+    }
+
+    /**
      * Returns a 405 method not allowed error with app error codes.
      *
      * @param int|array $codes
@@ -125,7 +110,22 @@ class MyJsonApiErrors
     }
 
     /**
-     * Returns a default error (500) with app error codes.
+     * Returns a 500 internal server error with app error codes.
+     *
+     * @param int|array $codes
+     * @param bool      $throw
+     *
+     * @throws \Neomerx\JsonApi\Exceptions\JsonApiException
+     *
+     * @return null|string
+     */
+    public static function internal($codes, $throw = true)
+    {
+        return self::error($codes, 500, $throw);
+    }
+
+    /**
+     * Returns a generic error (default is 500) with app error codes.
      *
      * @param int|array $codes
      * @param int       $statusCode
@@ -182,23 +182,19 @@ class MyJsonApiErrors
         } elseif (!is_array($codes)) {
             throw new Exception('Invalid code format given to MyJsonApiErrors.');
         }
-        if (function_exists('app')) {
-            $debug = app('config')->get('api.debug');
-        }
-        $debug = $debug == null ? true : $debug;
         self::$errorsCollection = new ErrorCollection();
         foreach ($codes as $key => $value) {
             if (is_int($value)) {
-                self::addError($value, $debug);
+                self::addError($value);
             } elseif (is_array($value)) {
                 $title = !array_key_exists('title', $value) ? null : $value['title'];
                 $detail = !array_key_exists('detail', $value) ? null : $value['detail'];
                 $method = !array_key_exists('method', $value) ? null : $value['method'];
                 $parameter = !array_key_exists('parameter', $value) ? null : $value['parameter'];
                 $idx = !array_key_exists('id', $value) ? null : $value['id'];
-                $link = !array_key_exists('link', $value) ? null : $value['link'];
+                $links = !array_key_exists('links', $value) ? null : $value['links'];
                 $meta = !array_key_exists('meta', $value) ? null : $value['meta'];
-                self::addError($key, $debug, $title, $detail, $method, $parameter, $idx, $link, $meta);
+                self::addError($key, $title, $detail, $method, $parameter, $idx, $links, $meta);
             } else {
                 throw new Exception('Invalid array code format given to MyJsonApiErrors.');
             }
@@ -209,33 +205,33 @@ class MyJsonApiErrors
      * Adds new Error object to the collection.
      *
      * @param string     $code
-     * @param bool       $debug
      * @param string     $title
      * @param string     $detail
      * @param string     $method
      * @param string     $parameter
      * @param int|string $idx
-     * @param array      $link
+     * @param array      $links
      * @param array      $meta
      *
      * @throws \Exception
      */
-    private static function addError($code, $debug, $title = null, $detail = null, $method = null, $parameter = null, $idx = null, array $link = null, array $meta = null)
+    private static function addError($code, $title = null, $detail = null, $method = null, $parameter = null, $idx = null, array $links = null, array $meta = null)
     {
         $error = self::checkError($code);
-        $title = $title ? $title : self::checkErrorData($error, 'title', true);
-        $detail = $detail ? $detail : (!$debug ? null : self::checkErrorData($error, 'detail'));
+        $requiredTitle = count($error) == 0 ? false : true;
+        $title = $title ? $title : self::checkErrorData($error, 'title', $requiredTitle);
+        $detail = $detail ? $detail : self::checkErrorData($error, 'detail');
         $method = $method ? $method : self::checkErrorData($error, 'method');
         $parameter = $parameter ? $parameter : self::checkErrorData($error, 'parameter');
         $idx = $idx ? $idx : self::checkErrorData($error, 'id');
-        $link = $link ? $link : self::checkErrorData($error, 'link');
+        $links = $links ? $links : self::checkErrorData($error, 'links');
         $meta = $meta ? $meta : self::checkErrorData($error, 'meta');
 
-        $link = self::checkLink($link);
+        $links = self::checkLinks($links);
         $meta = self::checkMeta($meta);
 
         if (!$method) {
-            $error = new Error($idx, $link, self::$statusCode, $code, $title, $detail, null, $meta);
+            $error = new Error($idx, $links, self::$statusCode, $code, $title, $detail, null, $meta);
             self::$errorsCollection->add($error);
         } else {
             $method = 'add'.ucfirst($method).'Error';
@@ -243,12 +239,12 @@ class MyJsonApiErrors
             if ($reflection->hasMethod($method)) {
                 if ($reflection->getMethod($method)->getNumberOfParameters() == 8) {
                     if ($parameter) {
-                        self::$errorsCollection->$method($parameter, $title, $detail, self::$statusCode, $idx, $link, $code, $meta);
+                        self::$errorsCollection->$method($parameter, $title, $detail, self::$statusCode, $idx, $links, $code, $meta);
                     } else {
                         throw new Exception('Invalid property format errors given to MyJsonApiErrors. The method provided expects a parameter.');
                     }
                 } else {
-                    self::$errorsCollection->$method($title, $detail, self::$statusCode, $idx, $link, $code, $meta);
+                    self::$errorsCollection->$method($title, $detail, self::$statusCode, $idx, $links, $code, $meta);
                 }
             } else {
                 $allMethods = $reflection->getMethods(ReflectionMethod::IS_PUBLIC);
@@ -309,32 +305,32 @@ class MyJsonApiErrors
     }
 
     /**
-     * Checks whether link was provided and whether it is on valid format.
+     * Checks whether links was provided and whether it is on valid format.
      *
-     * @param array $link
+     * @param array $links
      *
      * @throws \Exception
      *
      * @return null|\Neomerx\JsonApi\Document\Link
      */
-    private static function checkLink(array $link = null)
+    private static function checkLink(array $links = null)
     {
-        if (!$link) {
+        if (!$links) {
             return;
         }
-        $linkHref = !array_key_exists('href', $link) ? null : $link['href'];
-        $linkMeta = !array_key_exists('meta', $link) ? null : $link['meta'];
-        if ($linkMeta) {
-            if (!is_array($linkMeta)) {
-                throw new Exception('Invalid link meta given to MyJsonApiErrors.');
+        $linksHref = !array_key_exists('href', $links) ? null : $links['href'];
+        $linksMeta = !array_key_exists('meta', $links) ? null : $links['meta'];
+        if ($linksMeta) {
+            if (!is_array($linksMeta)) {
+                throw new Exception('Invalid links meta given to MyJsonApiErrors.');
             } else {
-                if (!self::isObject($linkMeta)) {
-                    throw new Exception('Invalid link meta given to MyJsonApiErrors. Not an array representing an object.');
+                if (!self::isObject($linksMeta)) {
+                    throw new Exception('Invalid links meta given to MyJsonApiErrors. Not an array representing an object.');
                 }
             }
         }
 
-        return !$linkHref ? null : new Link($linkHref, $linkMeta);
+        return !$linksHref ? null : new Link($linksHref, $linksMeta);
     }
 
     /**
