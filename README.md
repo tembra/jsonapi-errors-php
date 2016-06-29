@@ -15,7 +15,7 @@ Still framework agnostic, you can easily integrate it with [Laravel/Lumen](https
 
 ## Milestone to v1.0
 
-+ [x] Makes a JSON API Errors as simple as calling a function
++ [x] Makes JSON API Errors as simple as calling a function
 + [x] Standardize the errors
 + [x] Most common error functions for HTTP Status Codes
 + [x] Throw an exception or return the JSON string
