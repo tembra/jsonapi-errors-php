@@ -313,7 +313,7 @@ class MyJsonApiErrors
      *
      * @return null|\Neomerx\JsonApi\Document\Link
      */
-    private static function checkLink(array $links = null)
+    private static function checkLinks(array $links = null)
     {
         if (!$links) {
             return;

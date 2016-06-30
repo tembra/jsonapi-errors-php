@@ -17,11 +17,12 @@ Still framework agnostic, you can easily integrate it with [Laravel/Lumen](https
 
 + [x] Makes JSON API Errors as simple as calling a function
 + [x] Standardize the errors
-+ [x] Most common error functions for HTTP Status Codes
++ [x] Provide most common error functions for HTTP Status Codes
 + [x] Throw an exception or return the JSON string
 + [x] Override JSON API Error Objects members
 + [ ] Support for Localization
 + [ ] Generate Documentation for Application Error Codes
++ [ ] Build PHPUnit tests
 
 ## Sample usage
 
